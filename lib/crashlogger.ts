@@ -21,7 +21,7 @@ const logPath = path.resolve(
 let lastCrashLog = 0;
 let transport: any;
 
-function appendCause(error: any) {
+function appendCause(error: any): string {
 	let stack = ``;
 	if (typeof error.cause === 'string') {
 		stack += `\n\n[cause]: ${error.cause}\n`;

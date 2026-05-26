@@ -36,7 +36,7 @@ interface DashyStream {
 	bufLength: number;
 }
 
-function streamWrite(stream: DashyStream, writeBufLength: number, writeBuf: number) {
+const streamWrite = (stream: DashyStream, writeBufLength: number, writeBuf: number): void => {
 	stream.buf += (writeBuf << stream.bufLength);
 	stream.bufLength += writeBufLength;
 	while (stream.bufLength >= 5) {
@@ -44,18 +44,18 @@ function streamWrite(stream: DashyStream, writeBufLength: number, writeBuf: numb
 		stream.buf >>= 5;
 		stream.bufLength -= 5;
 	}
-}
+};
 
-function streamGetCode(stream: DashyStream) {
+const streamGetCode = (stream: DashyStream): string => {
 	const buf = stream.codeBuf + CODE_MAP.charAt(stream.buf);
 
 	// truncate trailing `2`s (0b00000 chunks)
 	let end2Len = 0;
 	while (buf.charAt(buf.length - 1 - end2Len) === '2') end2Len++;
 	return end2Len ? buf.slice(0, -end2Len) : buf;
-}
+};
 
-function streamPeek(stream: DashyStream, readLength: number, readMask: number = 0xFFFF >> (16 - readLength)) {
+const streamPeek = (stream: DashyStream, readLength: number, readMask: number = 0xFFFF >> (16 - readLength)): number => {
 	while (stream.bufLength < readLength && stream.codeBuf.length) {
 		const next5Bits = CODE_MAP.indexOf(stream.codeBuf.charAt(0));
 		if (next5Bits < 0) throw new Error("Invalid character in coded buffer");
@@ -64,17 +64,17 @@ function streamPeek(stream: DashyStream, readLength: number, readMask: number = 
 		stream.bufLength += 5;
 	}
 	return stream.buf & readMask;
-}
+};
 
-function streamRead(stream: DashyStream, readLength: number, readMask: number = 0xFFFF >> (16 - readLength)) {
+const streamRead = (stream: DashyStream, readLength: number, readMask: number = 0xFFFF >> (16 - readLength)): number => {
 	const output = streamPeek(stream, readLength, readMask);
 	// Note: bufLength can go negative! Streams have infinite trailing 0s
 	stream.buf >>= readLength;
 	stream.bufLength -= readLength;
 	return output;
-}
+};
 
-export function encode(str: string, allowCaps = false) {
+export const encode = (str: string, allowCaps = false): string => {
 	if (!str) return '0--0';
 	let safePart = '';
 	const unsafeStream: DashyStream = {
@@ -171,9 +171,9 @@ export function encode(str: string, allowCaps = false) {
 	}
 	if (!unsafePart) return safePart;
 	return `${safePart}--${unsafePart}`;
-}
+};
 
-export function decode(codedStr: string) {
+export const decode = (codedStr: string): string => {
 	let str = '';
 	let lastDashIndex = codedStr.lastIndexOf('--');
 	if (lastDashIndex < 0) {
@@ -263,9 +263,9 @@ export function decode(codedStr: string) {
 		}
 	}
 	return str;
-}
+};
 
-export function vizStream(codeBuf: string, translate = true) {
+export const vizStream = (codeBuf: string, translate = true): string => {
 	let spacedStream = '';
 	if (codeBuf.startsWith('0')) {
 		codeBuf = codeBuf.slice(1);
@@ -281,10 +281,10 @@ export function vizStream(codeBuf: string, translate = true) {
 		bufLength: 0,
 	};
 
-	function vizBlock(s: DashyStream, bufLen: number) {
+	const vizBlock = (s: DashyStream, bufLen: number): string => {
 		const buf = streamRead(s, bufLen);
 		return buf.toString(2).padStart(bufLen, '0');
-	}
+	};
 
 	while (stream.bufLength > 0 || stream.codeBuf) {
 		switch (streamRead(stream, 2)) {
@@ -311,4 +311,4 @@ export function vizStream(codeBuf: string, translate = true) {
 		}
 	}
 	return spacedStream;
-}
+};

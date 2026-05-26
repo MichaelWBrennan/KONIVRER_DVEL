@@ -36,14 +36,13 @@ export function getString(str: any): string {
 	return (typeof str === 'string' || typeof str === 'number') ? `${str}` : '';
 }
 
-export function escapeRegex(str: string) {
-	return str.replace(/[\\^$.*+?()[\]{}|]/g, '\\$&');
-}
+export const escapeRegex = (str: string): string =>
+	str.replace(/[\\^$.*+?()[\]{}|]/g, '\\$&');
 
 /**
  * Escapes HTML in a string.
 */
-export function escapeHTML(str: string | number) {
+export const escapeHTML = (str: string | number): string => {
 	if (str === null || str === undefined) return '';
 	return `${str}`
 		.replace(/&/g, '&amp;')
@@ -53,20 +52,20 @@ export function escapeHTML(str: string | number) {
 		.replace(/'/g, '&apos;')
 		.replace(/\//g, '&#x2f;')
 		.replace(/\n/g, '<br />');
-}
+};
 
 /**
  * Strips HTML from a string.
  */
-export function stripHTML(htmlContent: string) {
+export const stripHTML = (htmlContent: string): string => {
 	if (!htmlContent) return '';
 	return htmlContent.replace(/<[^>]*>/g, '');
-}
+};
 
 /**
  * Maps numbers to their ordinal string.
  */
-export function formatOrder(place: number) {
+export const formatOrder = (place: number): string => {
 	// anything between 10 and 20 should always end with -th
 	let remainder = place % 100;
 	if (remainder >= 10 && remainder <= 20) return `${place}th`;
@@ -77,12 +76,12 @@ export function formatOrder(place: number) {
 	if (remainder === 2) return `${place}nd`;
 	if (remainder === 3) return `${place}rd`;
 	return `${place}th`;
-}
+};
 
 /**
  * Visualizes eval output in a slightly more readable form
  */
-export function visualize(value: any, depth = 0): string {
+export const visualize = (value: any, depth = 0): string => {
 	if (value === undefined) return `undefined`;
 	if (value === null) return `null`;
 	if (typeof value === 'number' || typeof value === 'boolean') {
@@ -151,7 +150,7 @@ export function visualize(value: any, depth = 0): string {
 	}
 	if (constructor && !buf && constructor !== 'null') return constructor;
 	return `${constructor}{${buf}}`;
-}
+};
 
 /**
  * Compares two variables; intended to be used as a smarter comparator.
@@ -164,7 +163,7 @@ export function visualize(value: any, depth = 0): string {
  *
  * In other words: `[num, str]` will be sorted A to Z, `[num, {reverse: str}]` will be sorted Z to A.
  */
-export function compare(a: Comparable, b: Comparable): number {
+export const compare = (a: Comparable, b: Comparable): number => {
 	if (typeof a === 'number') {
 		return a - (b as number);
 	}
@@ -185,7 +184,7 @@ export function compare(a: Comparable, b: Comparable): number {
 		return compare((b as { reverse: string }).reverse, a.reverse);
 	}
 	throw new Error(`Passed value ${a} is not comparable`);
-}
+};
 
 /**
  * Sorts an array according to the callback's output on its elements.
@@ -250,7 +249,7 @@ export function splitFirst(str: string, delimiter: string | RegExp, limit = 1) {
 /**
  * Template string tag function for escaping HTML
  */
-export function html(strings: TemplateStringsArray, ...args: any) {
+export const html = (strings: TemplateStringsArray, ...args: any): string => {
 	let buf = strings[0];
 	let i = 0;
 	while (i < args.length) {
@@ -258,24 +257,23 @@ export function html(strings: TemplateStringsArray, ...args: any) {
 		buf += strings[++i];
 	}
 	return buf;
-}
+};
 
 /**
  * This combines escapeHTML and forceWrap. The combination allows us to use
  * <wbr /> instead of U+200B, which will make sure the word-wrapping hints
  * can't be copy/pasted (which would mess up code).
  */
-export function escapeHTMLForceWrap(text: string): string {
-	return escapeHTML(forceWrap(text)).replace(/\u200B/g, '<wbr />');
-}
+export const escapeHTMLForceWrap = (text: string): string =>
+	escapeHTML(forceWrap(text)).replace(/\u200B/g, '<wbr />');
 
 /**
  * HTML doesn't support `word-wrap: break-word` in tables, but sometimes it
  * would be really nice if it did. This emulates `word-wrap: break-word` by
  * manually inserting U+200B to tell long words to wrap.
  */
-export function forceWrap(text: string): string {
-	return text.replace(/[^\s]{30,}/g, word => {
+export const forceWrap = (text: string): string =>
+	text.replace(/[^\s]{30,}/g, word => {
 		let lastBreak = 0;
 		let brokenWord = '';
 		for (let i = 1; i < word.length; i++) {
@@ -287,33 +285,32 @@ export function forceWrap(text: string): string {
 		brokenWord += word.slice(lastBreak);
 		return brokenWord;
 	});
-}
 
-export function shuffle<T>(arr: T[]): T[] {
+export const shuffle = <T>(arr: T[]): T[] => {
 	// In-place shuffle by Fisher-Yates algorithm
 	for (let i = arr.length - 1; i > 0; i--) {
 		const j = Math.floor(Math.random() * (i + 1));
 		[arr[i], arr[j]] = [arr[j], arr[i]];
 	}
 	return arr;
-}
+};
 
-export function randomElement<T>(arr: T[]): T {
+export const randomElement = <T>(arr: T[]): T => {
 	const i = Math.floor(Math.random() * arr.length);
 	return arr[i];
-}
+};
 
 /** Forces num to be an integer (between min and max). */
-export function clampIntRange(num: any, min?: number, max?: number): number {
+export const clampIntRange = (num: any, min?: number, max?: number): number => {
 	if (typeof num !== 'number') num = 0;
 	num = Math.floor(num);
 	if (min !== undefined && num < min) num = min;
 	if (max !== undefined && num > max) num = max;
 	return num;
-}
+};
 
-export function clearRequireCache(options: { exclude?: string[] } = {}) {
-	const excludes = options?.exclude || [];
+export const clearRequireCache = (options: { exclude?: string[] } = {}): void => {
+	const excludes = options?.exclude ?? [];
 	excludes.push('/node_modules/');
 
 	for (const path in require.cache) {
@@ -323,9 +320,9 @@ export function clearRequireCache(options: { exclude?: string[] } = {}) {
 		uncacheModuleTree(mod, excludes);
 		delete require.cache[path];
 	}
-}
+};
 
-export function uncacheModuleTree(mod: NodeJS.Module, excludes: string[]) {
+export const uncacheModuleTree = (mod: NodeJS.Module, excludes: string[]): void => {
 	if (!mod.children?.length || excludes.some(p => mod.filename.includes(p))) return;
 	for (const [i, child] of mod.children.entries()) {
 		if (excludes.some(p => child.filename.includes(p))) continue;
@@ -333,9 +330,9 @@ export function uncacheModuleTree(mod: NodeJS.Module, excludes: string[]) {
 		uncacheModuleTree(child, excludes);
 	}
 	delete (mod as any).children;
-}
+};
 
-export function deepClone(obj: any): any {
+export const deepClone = (obj: any): any => {
 	if (obj === null || typeof obj !== 'object') return obj;
 	if (Array.isArray(obj)) return obj.map(prop => deepClone(prop));
 	const clone = Object.create(Object.getPrototypeOf(obj));
@@ -343,9 +340,9 @@ export function deepClone(obj: any): any {
 		clone[key] = deepClone(obj[key]);
 	}
 	return clone;
-}
+};
 
-export function deepFreeze<T>(obj: T): T {
+export const deepFreeze = <T>(obj: T): T => {
 	if (obj === null || typeof obj !== 'object') return obj;
 	// support objects with reference loops
 	if (Object.isFrozen(obj)) return obj;
@@ -357,9 +354,9 @@ export function deepFreeze<T>(obj: T): T {
 		for (const elem of Object.values(obj)) deepFreeze(elem);
 	}
 	return obj;
-}
+};
 
-export function levenshtein(s: string, t: string, l: number): number {
+export const levenshtein = (s: string, t: string, l: number): number => {
 	// Original levenshtein distance function by James Westgate, turned out to be the fastest
 	const d: number[][] = [];
 
@@ -404,40 +401,40 @@ export function levenshtein(s: string, t: string, l: number): number {
 
 	// Step 7
 	return d[n][m];
-}
+};
 
-export function waitUntil(time: number): Promise<void> {
-	return new Promise(resolve => {
+export const waitUntil = (time: number): Promise<void> =>
+	new Promise(resolve => {
 		setTimeout(() => resolve(), time - Date.now());
 	});
-}
 
 /** Like parseInt, but returns NaN if the int isn't already in normalized form */
-export function parseExactInt(str: string): number {
+export const parseExactInt = (str: string): number => {
 	if (!/^-?(0|[1-9][0-9]*)$/.test(str)) return NaN;
 	return parseInt(str);
-}
+};
 
 /** formats an array into a series of question marks and adds the elements to an arguments array */
-export function formatSQLArray(arr: unknown[], args?: unknown[]) {
+export const formatSQLArray = (arr: unknown[], args?: unknown[]): string => {
 	args?.push(...arr);
 	return [...'?'.repeat(arr.length)].join(', ');
-}
+};
 
-export function bufFromHex(hex: string) {
+export const bufFromHex = (hex: string): Uint8Array => {
 	const buf = new Uint8Array(Math.ceil(hex.length / 2));
 	bufWriteHex(buf, hex);
 	return buf;
-}
-export function bufWriteHex(buf: Uint8Array, hex: string, offset = 0) {
+};
+
+export const bufWriteHex = (buf: Uint8Array, hex: string, offset = 0): void => {
 	const size = Math.ceil(hex.length / 2);
 	for (let i = 0; i < size; i++) {
 		buf[offset + i] = parseInt(hex.slice(i * 2, i * 2 + 2).padEnd(2, '0'), 16);
 	}
-}
-export function bufReadHex(buf: Uint8Array, start = 0, end?: number) {
-	return [...buf.slice(start, end)].map(val => val.toString(16).padStart(2, '0')).join('');
-}
+};
+
+export const bufReadHex = (buf: Uint8Array, start = 0, end?: number): string =>
+	[...buf.slice(start, end)].map(val => val.toString(16).padStart(2, '0')).join('');
 
 export class Multiset<T> extends Map<T, number> {
 	override get(key: T) {
